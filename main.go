@@ -17,5 +17,6 @@ func main() {
 	if conf_err != nil {
 		errors.New("cannot change username")
 	}
-	fmt.Println(conf)
+	fmt.Printf("Url: %v\n", conf.Url)
+	fmt.Printf("Username: %v\n", conf.Username)
 }
