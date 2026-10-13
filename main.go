@@ -2,20 +2,48 @@ package main
 
 import (
 	"github.com/mirmeep/gator-blog/internal/config"
-	"errors"
 	"fmt"
-	"log"
+	"os"
 )
 
+type state struct {
+	conf *config.Config
+}
+
 func main() {
-	conf_contents, err := config.Read()
+	cfg, err := config.Read()
 	if err != nil {
-		errors.New("cannot read config file")
+		fmt.Println("cannot read config file: %v", err)
+		os.Exit(1)
 	}
 
-	conf_state := state{
-		conf: conf_contents
+	st := state{
+		conf: &cfg,
 	}
-	fmt.Printf("Url: %v\n", conf.Url)
-	fmt.Printf("Username: %v\n", conf.Username)
+
+	cmds := commands{
+		cmds: map[string]func(*state, command) error{
+			"login": handlerLogin,
+		},
+	}
+
+	args := os.Args
+	if len(args) < 2 {
+		fmt.Println("not enough arguments")
+		os.Exit(1)
+	}
+
+	cmdName := args[1]
+	cmdArgs := args[2:]
+
+	cmd := command{
+		name: cmdName,
+		args: cmdArgs,
+	}
+
+	err = cmds.run(&st, cmd)
+	if err != nil {
+		fmt.Println("cannot read config file:", err)	
+		os.Exit(1)
+	}
 }

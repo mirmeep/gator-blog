@@ -30,7 +30,7 @@ func Read() (Config, error) {
 
 	data, err := os.ReadFile(config_file)
 	if err != nil {
-		fmt.Errorf("%w", err)
+		return Config{}, fmt.Errorf("%w", err)
 	}
 
 	var conf Config
