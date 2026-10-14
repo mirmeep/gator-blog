@@ -2,11 +2,15 @@ package main
 
 import (
 	"github.com/mirmeep/gator-blog/internal/config"
+	"github.com/mirmeep/gator-blog/internal/database"
 	"fmt"
 	"os"
+	"database/sql"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
+	db *database.Queries
 	conf *config.Config
 }
 
@@ -17,8 +21,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbURL := cfg.Url
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		fmt.Println("cannot open database: %v", err)
+		os.Exit(1)
+	}
+	dbQueries := database.New(db)
+
 	st := state{
 		conf: &cfg,
+		db: dbQueries,
 	}
 
 	cmds := commands{
