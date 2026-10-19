@@ -39,6 +39,7 @@ func main() {
 			"login": handlerLogin,
 			"register": handlerRegister,
 			"reset": handlerReset,
+			"users": handlerUsers,
 		},
 	}
 

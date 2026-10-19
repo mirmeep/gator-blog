@@ -74,3 +74,26 @@ func handlerReset(s *state, cmd command) error {
 	fmt.Println("Database users successfully deleted!")
 	return nil
 }
+
+func handlerUsers(s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		return fmt.Errorf("command users doesn't take params")
+	}
+
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("could not get users: %w", err)
+	}
+
+	currentUser := s.conf.Username
+
+	for _, user := range users {
+		if user.String == currentUser {
+			fmt.Printf("* %s (current)\n", user.String)
+		} else {
+			fmt.Println("*", user.String)
+		}
+		
+	}
+	return nil
+}
