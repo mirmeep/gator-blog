@@ -37,6 +37,8 @@ func main() {
 	cmds := commands{
 		cmds: map[string]func(*state, command) error{
 			"login": handlerLogin,
+			"register": handlerRegister,
+			"reset": handlerReset,
 		},
 	}
 
@@ -56,7 +58,7 @@ func main() {
 
 	err = cmds.run(&st, cmd)
 	if err != nil {
-		fmt.Println("cannot read config file:", err)	
+		fmt.Println("error with running command: ", err)	
 		os.Exit(1)
 	}
 }
