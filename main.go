@@ -40,6 +40,7 @@ func main() {
 			"register": handlerRegister,
 			"reset": handlerReset,
 			"users": handlerUsers,
+			"agg": handlerAgg,
 		},
 	}
 
