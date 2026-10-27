@@ -42,6 +42,7 @@ func main() {
 			"users": handlerUsers,
 			"agg": handlerAgg,
 			"addfeed": handlerAddFeed,
+			"feeds": handlerFeeds,
 		},
 	}
 
