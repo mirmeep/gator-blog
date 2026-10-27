@@ -7,6 +7,9 @@ import (
 	"encoding/xml"
 	"context"
 	"html"
+	"time"
+	"github.com/mirmeep/gator-blog/internal/database"
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -68,9 +71,41 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 func handlerAgg(s *state, cmd command) error {
 	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
 	if err != nil {
-		fmt.Errorf("cannot fetch feed: %w", err)
+		return fmt.Errorf("cannot fetch feed: %w", err)
 	}
 
 	fmt.Println(feed)
 	return nil
 }
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		return fmt.Errorf("command requires two params, name and url")
+	}
+
+	name := cmd.args[0]
+	url := cmd.args[1]
+
+	currentUser, err := s.db.GetUser(context.Background(), s.conf.Username)
+	if err != nil {
+		return fmt.Errorf("cannot find user", err)
+	}
+
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID: uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name: name,
+		Url: url,
+		UserID: currentUser.ID,
+	})
+
+	if err != nil {
+		return fmt.Errorf("cannot create feed", err)
+	}
+
+	fmt.Printf("%v %v %v %s %s %v", feed.ID, feed.CreatedAt, feed.UpdatedAt, feed.Name, feed.Url, feed.UserID)
+
+	return nil
+}
+

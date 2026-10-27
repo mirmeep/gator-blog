@@ -6,7 +6,6 @@ import (
 	"github.com/mirmeep/gator-blog/internal/database"
 	"context"
 	"github.com/google/uuid"
-	"database/sql"
 )
 
 
@@ -16,10 +15,7 @@ func handlerLogin(s *state, cmd command) error {
 	}
 
 	username := cmd.args[0]
-	_, err := s.db.GetUser(context.Background(), sql.NullString{
-			String: username,
-			Valid: true,
-		})
+	_, err := s.db.GetUser(context.Background(), username)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -45,10 +41,7 @@ func handlerRegister(s *state, cmd command) error {
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Name: sql.NullString{
-			String: username,
-			Valid: true,
-		},
+		Name: username,
 	})
 
 	if err != nil {
@@ -88,10 +81,10 @@ func handlerUsers(s *state, cmd command) error {
 	currentUser := s.conf.Username
 
 	for _, user := range users {
-		if user.String == currentUser {
-			fmt.Printf("* %s (current)\n", user.String)
+		if user == currentUser {
+			fmt.Printf("* %s (current)\n", user)
 		} else {
-			fmt.Println("*", user.String)
+			fmt.Println("*", user)
 		}
 		
 	}
