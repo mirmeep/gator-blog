@@ -78,7 +78,7 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 2 {
 		return fmt.Errorf("command requires two params, name and url")
 	}
@@ -86,24 +86,19 @@ func handlerAddFeed(s *state, cmd command) error {
 	name := cmd.args[0]
 	url := cmd.args[1]
 
-	currentUser, err := s.db.GetUser(context.Background(), s.conf.Username)
-	if err != nil {
-		return fmt.Errorf("cannot find user", err)
-	}
-
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name: name,
 		Url: url,
-		UserID: currentUser.ID,
+		UserID: user.ID,
 	})
 
 	if err != nil {
 		return fmt.Errorf("cannot create feed", err)
 	}
-	fmt.Println("Added feed for", currentUser.Name)
+	fmt.Println("Added feed for", user.Name)
 	fmt.Printf("* ID:            	%s\n", feed.ID)
 	fmt.Printf("* Created:       	%v\n", feed.CreatedAt)
 	fmt.Printf("* Updated:       	%v\n", feed.UpdatedAt)
@@ -117,7 +112,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID: currentUser.ID,
+		UserID: user.ID,
 		FeedID: feed.ID,
 	})
 	if err != nil {
@@ -153,14 +148,9 @@ func handlerFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) < 1 {
 		return fmt.Errorf("command follow requires one arg, url")
-	}
-
-	currentUser, err := s.db.GetUser(context.Background(), s.conf.Username)
-	if err != nil {
-		return fmt.Errorf("cannot find current user: %w", err)
 	}
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), cmd.args[0])
@@ -172,7 +162,7 @@ func handlerFollow(s *state, cmd command) error {
 		ID: uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID: currentUser.ID,
+		UserID: user.ID,
 		FeedID: feed.ID,
 	})
 	if err != nil {
@@ -186,24 +176,58 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.args) > 0 {
 		return fmt.Errorf("command following doesn't take args")
 	}
 
-	currentUser, err := s.db.GetUser(context.Background(), s.conf.Username)
-	if err != nil {
-		return fmt.Errorf("cannot find current user: %w", err)
-	}
-
-	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), currentUser.ID)
+	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return fmt.Errorf("cannot get user follows: %w", err)	
 	}
-	fmt.Printf("%s is following:\n", currentUser)
+	fmt.Printf("%s is following:\n", user.Name)
 	for _, feed := range feedFollows {
 		fmt.Println(feed.FeedName)
 	}
 	fmt.Println("=====================================")
 	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("command unfollow requires one arg, url")
+	}
+
+	feed, err := s.db.GetFeedByUrl(context.Background(), cmd.args[0])
+	if err != nil {
+		return fmt.Errorf("could not find feed: %w", err)
+	}
+
+	unfollowed, err := s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams {
+		UserID: user.ID,
+		FeedID: feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("could not unfollow feed: %w", err)
+	}
+
+	fmt.Println("Successfully unfollowed feed:")
+	fmt.Printf("* ID:            %s\n", unfollowed.ID)
+	fmt.Printf("* Created:       %v\n", unfollowed.CreatedAt)
+	fmt.Printf("* Updated:       %v\n", unfollowed.UpdatedAt)
+	fmt.Printf("* UserID:        %s\n", unfollowed.UserID)
+	fmt.Printf("* FeedID:        %s\n", unfollowed.FeedID)
+	fmt.Println("=====================================")
+
+	return nil
+}
+
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	return func(s *state, cmd command) error {
+		currentUser, err := s.db.GetUser(context.Background(), s.conf.Username)
+		if err != nil {
+			return fmt.Errorf("cannot find current user: %w", err)
+		}	
+		return handler(s, cmd, currentUser)
+	}
 }
