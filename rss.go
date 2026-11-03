@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"database/sql"
 	"github.com/lib/pq"
+	"strconv"
 )
 
 type RSSFeed struct {
@@ -273,14 +274,85 @@ func scrapeFeeds(s *state) error {
 	if err != nil {
 		return fmt.Errorf("could not fetch feed: %w", err)
 	}
-	
+
 	fmt.Println("-------------------------------------")	
 	fmt.Println("Fetched feed for", feed.Channel.Title)
 	fmt.Println("-------------------------------------")
 	for index := range feed.Channel.Item {
-		fmt.Println(feed.Channel.Item[index].Title)
+		var parsedTime time.Time
+		var err error
+		parsedTime, err = time.Parse(time.RFC1123Z, feed.Channel.Item[index].PubDate)
+		if err != nil {
+			parsedTime, err = time.Parse(time.RFC1123, feed.Channel.Item[index].PubDate)	
+			
+		}
+		if err != nil {
+			parsedTime, err = time.Parse(time.RFC3339, feed.Channel.Item[index].PubDate)
+			
+		}
+		publishedDate := sql.NullTime {
+			Time: parsedTime,
+			Valid: err == nil,
+		}
+
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID: uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title: feed.Channel.Item[index].Title,
+			Url: feed.Channel.Item[index].Link,
+			Description: sql.NullString{
+				String: feed.Channel.Item[index].Description,
+				Valid: true,
+			},
+			PublishedAt: publishedDate,
+			FeedID: nextFeed.ID,
+		})
+
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			fmt.Errorf("post already exists in database: %w", err)
+			continue
+		}
+		fmt.Errorf("couldn't create post: %w", err)
+		continue
 	}
 	fmt.Println("=====================================")
+
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	limit := 2
+	var err error
+	if len(cmd.args) == 1 {
+		limit, err = strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return fmt.Errorf("could not parse string to int: %w", err)
+		}
+	} 
+
+	posts, err := s.db.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
+		UserID: user.ID, 
+		Limit: int32(limit),
+	})
+	if err != nil {
+		return fmt.Errorf("could not get posts: %w", err)
+	}
+	
+	fmt.Println("=====================================")	
+	fmt.Println("Printing posts for", user.Name)
+	fmt.Println("=====================================")	
+	for _, post := range posts {
+		fmt.Printf("* ID:            		%s\n", post.ID)
+		fmt.Printf("* Created:       		%v\n", post.CreatedAt)
+		fmt.Printf("* Updated:       		%v\n", post.UpdatedAt)
+		fmt.Printf("* Title:          		%s\n", post.Title)
+		fmt.Printf("* URL:           		%s\n", post.Url)
+		fmt.Printf("* Description:          %s\n", post.Description.String)
+		fmt.Printf("* Published:			%s\n", post.PublishedAt.Time)
+		fmt.Printf("* Feed ID:				%s\n", post.FeedID)		
+		fmt.Println("-------------------------------------")
+	}
 
 	return nil
 }
