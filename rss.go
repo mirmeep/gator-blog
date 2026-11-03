@@ -10,6 +10,8 @@ import (
 	"time"
 	"github.com/mirmeep/gator-blog/internal/database"
 	"github.com/google/uuid"
+	"database/sql"
+	"github.com/lib/pq"
 )
 
 type RSSFeed struct {
@@ -69,12 +71,24 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if len(cmd.args) < 1 {
+		return fmt.Errorf("command requires one arg, time duration")
+	}
+	timeBetweenReqs, err := time.ParseDuration(cmd.args[0])
+	fmt.Println("Time between reqs is:", timeBetweenReqs)
 	if err != nil {
-		return fmt.Errorf("cannot fetch feed: %w", err)
+		return fmt.Errorf("could not parse duration: %w", err)
 	}
 
-	fmt.Println(feed)
+	if timeBetweenReqs <= 0 {
+		return fmt.Errorf("not a valid time duration")
+	}
+
+	fmt.Printf("Collecting feeds every %s\n", timeBetweenReqs)
+	ticker := time.NewTicker(timeBetweenReqs)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
 	return nil
 }
 
@@ -95,8 +109,12 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		UserID: user.ID,
 	})
 
+	if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+		return fmt.Errorf("feed already exists")
+	}
+
 	if err != nil {
-		return fmt.Errorf("cannot create feed", err)
+		return fmt.Errorf("cannot create feed: %w", err)
 	}
 	fmt.Println("Added feed for", user.Name)
 	fmt.Printf("* ID:            	%s\n", feed.ID)
@@ -230,4 +248,39 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 		}	
 		return handler(s, cmd, currentUser)
 	}
+}
+
+func scrapeFeeds(s *state) error {
+	nextFeed, err := s.db.GetNextFeedToFetch(context.Background())
+
+	if err != nil {
+		return fmt.Errorf("cannot fetch next feed: %w", err) 
+	}
+
+	err = s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
+		ID: nextFeed.ID,
+		LastFetchedAt: sql.NullTime{
+			Time: time.Now(),
+			Valid: true,
+		},
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		return fmt.Errorf("could not update feed last fetched: %w", err)
+	}
+
+	feed, err := fetchFeed(context.Background(), nextFeed.Url)
+	if err != nil {
+		return fmt.Errorf("could not fetch feed: %w", err)
+	}
+	
+	fmt.Println("-------------------------------------")	
+	fmt.Println("Fetched feed for", feed.Channel.Title)
+	fmt.Println("-------------------------------------")
+	for index := range feed.Channel.Item {
+		fmt.Println(feed.Channel.Item[index].Title)
+	}
+	fmt.Println("=====================================")
+
+	return nil
 }
