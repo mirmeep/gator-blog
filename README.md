@@ -53,7 +53,7 @@ You will see which user is currently logged in.
 `gator-blog login <name>`\
 This will login to the specified user.
 #### addfeed
-`gator-blog addfeed <name> <url>`\
+`gator-blog addfeed <name-of-feed> <url>`\
 This will add the specified feed
 
 >[!note]
