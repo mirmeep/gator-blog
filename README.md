@@ -49,7 +49,7 @@ Run `gator-blog` and if an output like `not enough arguments` occurs, then it's 
 ## Now What? Commands!
 Cool! Let's run some commands :)
 #### register
-`gator-blog register <kimi-no-nawa>`\
+`gator-blog register <kimi-no-nawa>` (for the uncultured out there, the argument is just your name :p)\
 This adds a user to your database.
 Try adding a few users :)
 #### users
