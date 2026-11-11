@@ -11,20 +11,20 @@ You must have Go and Postgres (v15+) installed .
 ## Setting up the Database
 > [!important]
 > For the sake of documentation and project submission purposes, I am including these steps here, but I will try to figure out how to streamline this process later down the line. I apologize for the inconvenience.
-1. Start the server
+1. Start the server:
 `sudo service postgresql start`
-2. Enter the shell
+2. Enter the shell:
 `sudo -u postgres psql`
-3. Create the database
+3. Create the database:
 `CREATE DATABASE gator;`
-4. Connect to the database (still in the shell)
+4. Connect to the database (still in the shell):
 `\c gator`
-5. Create a password
+5. Create a password:
 `ALTER USER <user> PASSWORD <password>`
 6. Exit the shell
-7. Test your connection string
+7. Test your connection string:
 `psql 'postgres://<user>:<password>@localhost:5432/gator'`
-8. Create a `.gatorconfig.json` in your home directory
+8. Create a `.gatorconfig.json` in your home directory:
 9. Add the connection string to your gatorconfig.json in your home but with the extra string `?sslmode=disable`. Your json config should look like:
 ```json
 {
@@ -42,8 +42,8 @@ Run `gator-blog` and if an output like `not enough arguments` occurs, then it's 
 ## Now What? Commands!
 Cool! Let's run some commands :)
 #### register
-`gator-blog register <your-name>`
-This adds a user to your database
+`gator-blog register <kimi-no-nawa>`
+\This adds a user to your database.
 Try adding a few users :)
 #### users
 `gator-blog users`
