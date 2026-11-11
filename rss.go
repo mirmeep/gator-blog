@@ -72,7 +72,7 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	if len(cmd.args) < 1 {
+	if len(cmd.args) != 1 {
 		return fmt.Errorf("command requires one arg, time duration")
 	}
 	timeBetweenReqs, err := time.ParseDuration(cmd.args[0])
@@ -94,7 +94,7 @@ func handlerAgg(s *state, cmd command) error {
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
-	if len(cmd.args) < 2 {
+	if len(cmd.args) != 2 {
 		return fmt.Errorf("command requires two params, name and url")
 	}
 
@@ -141,7 +141,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 }
 
 func handlerFeeds(s *state, cmd command) error {
-	if len(cmd.args) > 0 {
+	if len(cmd.args) != 0 {
 		return fmt.Errorf("command feeds doesn't take params")
 	}
 
@@ -168,7 +168,7 @@ func handlerFeeds(s *state, cmd command) error {
 }
 
 func handlerFollow(s *state, cmd command, user database.User) error {
-	if len(cmd.args) < 1 {
+	if len(cmd.args) != 1 {
 		return fmt.Errorf("command follow requires one arg, url")
 	}
 
@@ -196,7 +196,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 }
 
 func handlerFollowing(s *state, cmd command, user database.User) error {
-	if len(cmd.args) > 0 {
+	if len(cmd.args) != 0 {
 		return fmt.Errorf("command following doesn't take args")
 	}
 
@@ -213,7 +213,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 }
 
 func handlerUnfollow(s *state, cmd command, user database.User) error {
-	if len(cmd.args) < 1 {
+	if len(cmd.args) != 1 {
 		return fmt.Errorf("command unfollow requires one arg, url")
 	}
 
@@ -316,7 +316,6 @@ func scrapeFeeds(s *state) error {
 		fmt.Errorf("couldn't create post: %w", err)
 		continue
 	}
-	fmt.Println("=====================================")
 
 	return nil
 }

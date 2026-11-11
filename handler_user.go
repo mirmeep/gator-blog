@@ -10,14 +10,14 @@ import (
 
 
 func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
+	if len(cmd.args) != 1 {
 		return fmt.Errorf("command login requires 1 argument, username")
 	}
 
 	username := cmd.args[0]
 	_, err := s.db.GetUser(context.Background(), username)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return fmt.Errorf("could not find user %s: %w", username, err)
 	}
 
 	err = s.conf.SetUser(username)
@@ -31,7 +31,7 @@ func handlerLogin(s *state, cmd command) error {
 }
 
 func handlerRegister(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
+	if len(cmd.args) != 1 {
 		return fmt.Errorf("command register requires 1 argument, name")
 	}
 
@@ -49,13 +49,13 @@ func handlerRegister(s *state, cmd command) error {
 	}
 
 	s.conf.SetUser(username)
-	fmt.Printf("User %s created!", username)
+	fmt.Printf("User %s created!\n", username)
 
 	return nil
 }
 
 func handlerReset(s *state, cmd command) error {
-	if len(cmd.args) > 0 {
+	if len(cmd.args) != 0 {
 		return fmt.Errorf("command reset doesn't take params")
 	}
 
@@ -69,7 +69,7 @@ func handlerReset(s *state, cmd command) error {
 }
 
 func handlerUsers(s *state, cmd command) error {
-	if len(cmd.args) > 0 {
+	if len(cmd.args) != 0 {
 		return fmt.Errorf("command users doesn't take params")
 	}
 
