@@ -11,6 +11,10 @@ You must have Go and Postgres (v15+) installed .
 ## Setting up the Database
 > [!important]
 > For the sake of documentation and project submission purposes, I am including these steps here, but I will try to figure out how to streamline this process later down the line. I apologize for the inconvenience.
+
+> [!caution]
+> oh yeah, and the below steps only works for Linux. Who the f is steve jobs? and don't even get me started with microsoft.
+
 1. Start the server:
 `sudo service postgresql start`
 2. Enter the shell:
