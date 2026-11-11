@@ -46,14 +46,14 @@ Cool! Let's run some commands :)
 This adds a user to your database.
 Try adding a few users :)
 #### users
-`gator-blog users`
+`gator-blog users`\
 This lists the users
 You will see which user is currently logged in.
 #### login
-`gator-blog login <name>`
+`gator-blog login <name>`\
 This will login to the specified user.
 #### addfeed
-`gator-blog addfeed <name> <url>`
+`gator-blog addfeed <name> <url>`\
 This will add the specified feed
 
 >[!note]
@@ -64,21 +64,21 @@ ain't that neato?
 
 Add a few more feeds!
 #### feeds
-`gator-blog feeds`
+`gator-blog feeds`\
 This will list the feeds of all users.
 #### follow
-`gator-blog follow <url>`
+`gator-blog follow <url>`\
 This allows the currently logged in user to follow a feed that is already in the database.
 #### following
-`gator-blog following`
+`gator-blog following`\
 This lists the feeds the currently logged in user is following.
 #### unfollow
-`gator-blog unfollow <url>`
+`gator-blog unfollow <url>`\
 Un-follows a feed that the currently logged in user is following.
 ### agg
-`gator-blog agg <time-string>`
+`gator-blog agg <time-string>`\
 This aggregates blogs! The `<time-string>` can be something like `5s`
 #### browse
-`gator-blog browse <optional-limit>`
+`gator-blog browse <optional-limit>`\
 After aggregating, this allows the currently logged in user to see their feeds! 
 
