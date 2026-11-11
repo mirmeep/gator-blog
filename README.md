@@ -3,7 +3,7 @@ Hi! Thanks for checking my project out :)
 I made this purely for educational reasons, so please be sure to check out the below warning. 
 
 >[!warning]
-> This documentation is incomplete and may lead to increasing frustration and laptop defenestration. 
+> This documentation is probably incomplete and may lead to increasing frustration and laptop defenestration. 
 
 <3
 ## Prerequisites
@@ -14,6 +14,9 @@ You must have Go and Postgres (v15+) installed .
 
 > [!caution]
 > oh yeah, and the below steps only works for Linux. Who the f is steve jobs? and don't even get me started with microsoft.
+
+> [!tip]
+> damn these markdown boxes are fun with their own colors lol
 
 1. Start the server:
 `sudo service postgresql start`
