@@ -48,19 +48,19 @@ After cloning this repository, run `go install .` from the root of the project.
 Run `gator-blog` and if an output like `not enough arguments` occurs, then it's installed!
 ## Now What? Commands!
 Cool! Let's run some commands :)
-#### register
-`gator-blog register <kimi-no-nawa>` (for the uncultured out there, the argument is just your name :p)\
+#### `gator-blog register <kimi-no-nawa>`
+ (for the uncultured out there, the argument is just your name :p)
 This adds a user to your database.
 Try adding a few users :)
-#### users
-`gator-blog users`\
+#### `gator-blog users`
+
 This lists the users
 You will see which user is currently logged in.
-#### login
-`gator-blog login <name>`\
+#### `gator-blog login <name>`
+
 This will login to the specified user.
-#### addfeed
-`gator-blog addfeed <name-of-feed> <url>`\
+#### `gator-blog addfeed <name-of-feed> <url>`
+
 This will add the specified feed
 
 >[!note]
